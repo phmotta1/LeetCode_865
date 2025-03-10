@@ -1,55 +1,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct NoArvore {
-    int valor;
-    struct NoArvore *esquerda;
-    struct NoArvore *direita;
+struct {
+    int val;
+    struct TreeNode *left;
+    struct TreeNode *right;
 };
 
-int profundidadeMaxima(struct NoArvore* raiz) {
-    if (!raiz) return 0;
-    int profundidadeEsquerda = profundidadeMaxima(raiz->esquerda);
-    int profundidadeDireita = profundidadeMaxima(raiz->direita);
-    return 1 + (profundidadeEsquerda > profundidadeDireita ? profundidadeEsquerda : profundidadeDireita);
+int getDepth(struct TreeNode *root) {
+    if (!root) return 0;
+    int leftDepth = getDepth(root->left);
+    int rightDepth = getDepth(root->right);
+    return (leftDepth > rightDepth ? leftDepth : rightDepth) + 1;
 }
 
-struct NoArvore* encontrarSubarvore(struct NoArvore* raiz, int profundidade, int maxProfundidade) {
-    if (!raiz) return NULL;
-    if (profundidade == maxProfundidade) return raiz;
+struct TreeNode* subtreeWithAllDeepest(struct TreeNode* root) {
+    if (!root) return NULL;
     
-    struct NoArvore* esquerda = encontrarSubarvore(raiz->esquerda, profundidade + 1, maxProfundidade);
-    struct NoArvore* direita = encontrarSubarvore(raiz->direita, profundidade + 1, maxProfundidade);
+    int leftDepth = getDepth(root->left);
+    int rightDepth = getDepth(root->right);
     
-    if (esquerda && direita) return raiz;
-    return esquerda ? esquerda : direita;
-}
-
-struct NoArvore* subarvoreComTodosMaisProfundos(struct NoArvore* raiz) {
-    int maxProfundidade = profundidadeMaxima(raiz) - 1;
-    return encontrarSubarvore(raiz, 0, maxProfundidade);
-}
-
-struct NoArvore* novoNo(int valor) {
-    struct NoArvore* no = (struct NoArvore*)malloc(sizeof(struct NoArvore));
-    no->valor = valor;
-    no->esquerda = no->direita = NULL;
-    return no;
-}
-
-int main() {
-    struct NoArvore* raiz = novoNo(3);
-    raiz->esquerda = novoNo(5);
-    raiz->direita = novoNo(1);
-    raiz->esquerda->esquerda = novoNo(6);
-    raiz->esquerda->direita = novoNo(2);
-    raiz->direita->esquerda = novoNo(0);
-    raiz->direita->direita = novoNo(8);
-    raiz->esquerda->direita->esquerda = novoNo(7);
-    raiz->esquerda->direita->direita = novoNo(4);
-    
-    struct NoArvore* resultado = subarvoreComTodosMaisProfundos(raiz);
-    printf("menor subarvore com todos os nós mais profundos %d\n", resultado->valor);
-    
-    return 0;
+    if (leftDepth == rightDepth) {
+        return root;
+    } else if (leftDepth > rightDepth) {
+        return subtreeWithAllDeepest(root->left);
+    } else {
+        return subtreeWithAllDeepest(root->right);
+    }
 }
